@@ -43,10 +43,10 @@ workflows:
     - git-clone@3.5.2: {}
     - script@1.1.4:
         title: Do anything with Script step
-    - npm@0.9.0:
+    - npm@3.10.10:
         inputs:
         - command: install
-    - npm@0.9.0:
+    - npm@3.10.10:
         inputs:
         - command: test
     - deploy-to-bitrise-io@1.3.7: {}
