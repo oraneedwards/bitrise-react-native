@@ -1,0 +1,52 @@
+format_version: "4"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+app:
+  envs:
+  - GRADLE_BUILD_FILE_PATH: android/build.gradle
+  - GRADLEW_PATH: android/gradlew
+  - BITRISE_PROJECT_PATH: ios/bitrise_test.xcodeproj
+  - BITRISE_SCHEME: bitrise_test
+trigger_map:
+- push_branch: '*'
+  workflow: primary
+- pull_request_source_branch: '*'
+  workflow: primary
+workflows:
+  deploy:
+    steps:
+    - activate-ssh-key@3.1.1:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@3.5.2: {}
+    - script@1.1.4:
+        title: Do anything with Script step
+    - npm@0.9.0:
+        inputs:
+        - command: install
+    - install-missing-android-tools@2.0.2: {}
+    - gradle-runner@1.7.7:
+        inputs:
+        - gradle_file: $GRADLE_BUILD_FILE_PATH
+        - gradle_task: assembleRelease
+        - gradlew_path: $GRADLEW_PATH
+    - certificate-and-profile-installer@1.8.8: {}
+    - xcode-archive@2.3.1:
+        inputs:
+        - project_path: $BITRISE_PROJECT_PATH
+        - scheme: $BITRISE_SCHEME
+        - configuration: Release
+    - deploy-to-bitrise-io@1.3.7: {}
+  primary:
+    steps:
+    - activate-ssh-key@3.1.1:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@3.5.2: {}
+    - script@1.1.4:
+        title: Do anything with Script step
+    - npm@0.9.0:
+        inputs:
+        - command: install
+    - npm@0.9.0:
+        inputs:
+        - command: test
+    - deploy-to-bitrise-io@1.3.7: {}
